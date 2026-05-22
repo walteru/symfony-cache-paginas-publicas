@@ -1,0 +1,37 @@
+framework:
+    messenger:
+        # Los mensajes que agoten sus reintentos no se pierden: van a este
+        # transport para inspeccionarlos (messenger:failed:show / :retry).
+        failure_transport: failed
+
+        transports:
+            # El transport asíncrono: la cola donde el mensaje ESPERA hasta que
+            # el worker lo procese. Acá es Redis (ver MESSENGER_TRANSPORT_DSN).
+            async:
+                dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+                # Si el handler falla (p. ej. el SMTP estaba caído), se reintenta
+                # con backoff exponencial: 1s, 2s, 4s. Tras 3 intentos → failed.
+                retry_strategy:
+                    max_retries: 3
+                    delay: 1000
+                    multiplier: 2
+
+            # Cola de fallidos. Sobre Doctrine (SQLite) porque queremos que
+            # sobrevivan a un reinicio para poder revisarlos después.
+            failed: 'doctrine://default?queue_name=failed'
+
+            # Transport síncrono: procesa en el MISMO request. No lo usamos para
+            # las notificaciones, pero queda disponible si alguna vez se necesita.
+            sync: 'sync://'
+
+        routing:
+            # ESTA línea es la que manda el trabajo a segundo plano: en vez de
+            # ejecutar el handler en el request, encola el mensaje en "async".
+            App\Message\NotificarSuscriptores: async
+
+when@test:
+    framework:
+        messenger:
+            transports:
+                # En tests no levantamos Redis: los mensajes se procesan en memoria.
+                async: 'in-memory://'

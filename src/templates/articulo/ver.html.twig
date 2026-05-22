@@ -1,0 +1,86 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ articulo.titulo }}{% endblock %}
+
+{% set etiquetas = {
+    'enviar_a_revision': 'Enviar a revisión',
+    'aprobar': 'Aprobar',
+    'rechazar': 'Rechazar',
+    'publicar': 'Publicar',
+    'reescribir': 'Volver a borrador'
+} %}
+
+{% block body %}
+    <p><a href="{{ path('articulos_listar') }}">← Volver</a></p>
+
+    <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:1rem;">
+            <h2 style="margin:0;">{{ articulo.titulo }}</h2>
+            <span class="badge {{ articulo.estado }}">{{ articulo.estado|replace({'_':' '}) }}</span>
+        </div>
+        <p class="muted">Por {{ articulo.autor }} · creado {{ articulo.creadoEl|date('d/m/Y H:i') }}
+            {% if articulo.publicadoEl %} · publicado {{ articulo.publicadoEl|date('d/m/Y H:i') }}{% endif %}
+        </p>
+        <p style="white-space:pre-wrap;">{{ articulo.contenido }}</p>
+
+        {% if articulo.motivoRechazo and articulo.estado == 'rechazado' %}
+            <div class="flash error">Motivo del rechazo: {{ articulo.motivoRechazo }}</div>
+        {% endif %}
+    </div>
+
+    <div class="card">
+        <h3 style="margin-top:0;">Acciones disponibles</h3>
+        {% if transiciones is empty %}
+            <p class="muted">
+                No hay transiciones posibles desde «{{ articulo.estado|replace({'_':' '}) }}» con el rol <strong>{{ rol }}</strong>.
+                {% if rol != 'editor' and articulo.estado == 'en_revision' %}
+                    Cambiá a <a href="{{ path('cambiar_rol', {rol:'editor'}) }}">rol editor</a> para aprobar o rechazar.
+                {% endif %}
+            </p>
+        {% else %}
+            <div class="acciones">
+                {% for t in transiciones %}
+                    {% if t.name == 'rechazar' %}
+                        <form method="post" action="{{ path('articulos_transicion', {id: articulo.id, transicion: 'rechazar'}) }}" style="flex:1 1 100%;">
+                            <input type="hidden" name="_token" value="{{ csrf_token('transicion' ~ articulo.id) }}">
+                            <label for="motivo">Motivo del rechazo</label>
+                            <textarea id="motivo" name="motivo" rows="2" placeholder="¿Qué hay que corregir?"></textarea>
+                            <div style="margin-top:.5rem;"><button class="btn" type="submit">{{ etiquetas[t.name] ?? t.name }}</button></div>
+                        </form>
+                    {% else %}
+                        <form method="post" action="{{ path('articulos_transicion', {id: articulo.id, transicion: t.name}) }}">
+                            <input type="hidden" name="_token" value="{{ csrf_token('transicion' ~ articulo.id) }}">
+                            <button class="btn btn-primary" type="submit">{{ etiquetas[t.name] ?? t.name }}</button>
+                        </form>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+
+    {% if articulo.estado == 'publicado' %}
+        <div class="card">
+            <h3 style="margin-top:0;">Notificaciones a suscriptores</h3>
+            {% if notificaciones is empty %}
+                <p class="muted">
+                    Todavía ninguna. El mensaje está encolado y el worker las está procesando
+                    (un mail simulado por suscriptor, con una pausa a propósito).
+                    <strong>Refrescá la página</strong> en unos segundos y mirá cómo aparecen.
+                </p>
+            {% else %}
+                <p class="muted">
+                    {{ notificaciones|length }} enviada(s) por el <strong>worker en segundo plano</strong>.
+                    Fijate la hora: son posteriores al instante en que publicaste.
+                </p>
+                <ul class="lista">
+                    {% for n in notificaciones %}
+                        <li>
+                            <span>📧 {{ n.email }}</span>
+                            <span class="muted">{{ n.enviadoEl|date('H:i:s') }}</span>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+    {% endif %}
+{% endblock %}

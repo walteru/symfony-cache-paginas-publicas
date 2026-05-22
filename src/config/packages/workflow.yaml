@@ -1,0 +1,36 @@
+framework:
+    workflows:
+        # Una "state_machine": el artículo está en UN solo lugar a la vez
+        # (a diferencia de un "workflow", donde podría estar en varios).
+        publicacion:
+            type: state_machine
+            audit_trail:
+                enabled: true          # loguea cada transición (útil para verla en el profiler)
+            marking_store:
+                type: method
+                property: estado       # el componente lee/escribe Articulo::$estado
+            supports:
+                - App\Entity\Articulo
+            initial_marking: borrador
+            places:
+                - borrador
+                - en_revision
+                - aprobado
+                - rechazado
+                - publicado
+            transitions:
+                enviar_a_revision:
+                    from: borrador
+                    to: en_revision
+                aprobar:
+                    from: en_revision
+                    to: aprobado
+                rechazar:
+                    from: en_revision
+                    to: rechazado
+                publicar:
+                    from: aprobado
+                    to: publicado
+                reescribir:
+                    from: rechazado
+                    to: borrador

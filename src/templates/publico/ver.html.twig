@@ -1,0 +1,25 @@
+{% extends 'publico/base.html.twig' %}
+
+{% block title %}{{ articulo.titulo }}{% endblock %}
+
+{% block body %}
+    <p><a href="{{ path('publico_listar') }}">← Volver</a></p>
+
+    <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:1rem; margin-bottom:.5rem;">
+            <h2 style="margin:0;">{{ articulo.titulo }}</h2>
+            {# Fragmento ESI: el reverse proxy resuelve este sub-request en CADA visita,
+               mientras la página exterior sigue siendo cache hit. Por eso el contador
+               está siempre fresco aunque la página esté "vieja". #}
+            {{ render_esi(controller('App\\Controller\\PublicoController::vistas', {id: articulo.id})) }}
+        </div>
+        <p class="muted">Por {{ articulo.autor }} · publicado {{ articulo.publicadoEl|date('d/m/Y H:i') }}</p>
+        <p style="white-space:pre-wrap; margin-top:1rem;">{{ articulo.contenido }}</p>
+    </div>
+
+    <p class="muted">
+        Esta página entera está cacheada (<code>s-maxage=60</code>); el número de
+        vistas de arriba viene por un fragmento ESI que se renderiza siempre fresco.
+        Refrescá y mirá: el contenido no cambia, las vistas sí.
+    </p>
+{% endblock %}

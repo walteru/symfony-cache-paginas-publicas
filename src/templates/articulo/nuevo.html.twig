@@ -1,0 +1,23 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nuevo artículo{% endblock %}
+
+{% block body %}
+    <h2>Nuevo artículo</h2>
+    <form method="post" class="card">
+        <label for="titulo">Título</label>
+        <input id="titulo" name="titulo" required>
+
+        <label for="autor">Autor</label>
+        <input id="autor" name="autor" placeholder="Tu nombre">
+
+        <label for="contenido">Contenido</label>
+        <textarea id="contenido" name="contenido" rows="6" placeholder="Escribí al menos 50 caracteres para poder enviarlo a revisión…"></textarea>
+
+        <div class="acciones">
+            <button class="btn btn-primary" type="submit">Crear borrador</button>
+            <a class="btn" href="{{ path('articulos_listar') }}">Cancelar</a>
+        </div>
+    </form>
+    <p class="muted">Todo artículo nace en <span class="badge borrador">borrador</span>. Desde su ficha lo movés por el flujo.</p>
+{% endblock %}

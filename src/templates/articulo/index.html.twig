@@ -1,0 +1,26 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+        <h2 style="margin:0;">Artículos</h2>
+        <a class="btn btn-primary" href="{{ path('articulos_nuevo') }}">+ Nuevo artículo</a>
+    </div>
+
+    {% if articulos is empty %}
+        <div class="card muted">Todavía no hay artículos. Creá el primero para ver el flujo en acción.</div>
+    {% else %}
+        <div class="card">
+            <ul class="lista">
+                {% for articulo in articulos %}
+                    <li>
+                        <span>
+                            <a href="{{ path('articulos_ver', {id: articulo.id}) }}">{{ articulo.titulo }}</a>
+                            <span class="muted"> · {{ articulo.autor }}</span>
+                        </span>
+                        <span class="badge {{ articulo.estado }}">{{ articulo.estado|replace({'_':' '}) }}</span>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+{% endblock %}

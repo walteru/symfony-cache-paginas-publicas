@@ -1,0 +1,42 @@
+services:
+  # Contenedor "web": atiende el request. Detrás del Kernel hay un reverse proxy
+  # cache (HttpCache de Symfony): la mayoría de los hits a páginas públicas no
+  # tocan la app, los responde el cache. Las páginas con ESI sí ejecutan el
+  # controller del fragmento dinámico (las vistas) y dejan el resto cacheado.
+  app:
+    container_name: cache-paginas-app
+    build:
+      context: docker/php-apache
+    volumes:
+      - ./src/:/var/www/html
+    ports:
+      - '8094:80'
+    depends_on:
+      - redis
+    networks:
+      - cache-net
+
+  # Worker de Messenger: continuamos la serie. Al publicar, sigue notificando
+  # a los suscriptores en segundo plano (igual que en el demo #2). Acá agregamos
+  # además la INVALIDACIÓN de cache (sincrónica) en el mismo evento.
+  worker:
+    container_name: cache-paginas-worker
+    build:
+      context: docker/php-apache
+    volumes:
+      - ./src/:/var/www/html
+    command: ["su", "www-data", "-s", "/bin/sh", "-c", "php bin/console messenger:consume async -vv --time-limit=3600 --memory-limit=128M"]
+    depends_on:
+      - redis
+    restart: unless-stopped
+    networks:
+      - cache-net
+
+  redis:
+    image: redis:7-alpine
+    container_name: cache-paginas-redis
+    networks:
+      - cache-net
+
+networks:
+  cache-net:

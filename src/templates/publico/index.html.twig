@@ -1,0 +1,26 @@
+{% extends 'publico/base.html.twig' %}
+
+{% block body %}
+    <h2 style="margin-top:0;">Últimos artículos publicados</h2>
+
+    {% if articulos is empty %}
+        <div class="card muted">Todavía no hay artículos publicados.</div>
+    {% else %}
+        <div class="card">
+            <ul class="lista">
+                {% for articulo in articulos %}
+                    <li>
+                        <a href="{{ path('publico_ver', {id: articulo.id}) }}">{{ articulo.titulo }}</a>
+                        <span class="muted"> · {{ articulo.autor }} · {{ articulo.publicadoEl|date('d/m/Y') }}</span>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+
+    <p class="muted">
+        Esta página tiene <code>Cache-Control: public, s-maxage=60</code>. Refrescá
+        un par de veces y mirá los headers con <code>make cache-headers</code>: la
+        primera respuesta es <strong>miss</strong>, las siguientes <strong>fresh</strong>.
+    </p>
+{% endblock %}
