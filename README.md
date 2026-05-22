@@ -2,6 +2,8 @@
 
 Demo **autocontenida** (clone & run con Docker) del [componente HttpCache + ESI](https://symfony.com/doc/current/http_cache.html) de Symfony, aplicado a un caso real: el **listado y la ficha pública** del blog editorial — cacheados con `s-maxage`, con un **fragmento ESI** (contador de vistas) que se renderiza fresco en cada hit y con **purga automática** cuando el contenido cambia.
 
+> 📝 **Post del blog:** [Symfony Cache: páginas públicas rápidas sin servir contenido viejo](https://sincrodev.com/blog/symfony-cache-paginas-publicas-rapidas-sin-servir-viejo/)
+
 Es la **tercera parte** de una serie. Las dos primeras:
 
 - [#1 Workflow](https://github.com/walteru/symfony-workflow-flujo-editorial): cuándo un artículo puede pasar a publicado.
@@ -105,6 +107,14 @@ Cuando hacés clic en *Publicar* en la admin:
 - Symfony 6.4 (PHP 8.3) · HttpCache + ESI (sin Varnish) · Doctrine ORM con **SQLite**
 - Messenger + Redis (heredado de #2, para mantener la composición de la serie)
 - Twig · Apache en el contenedor web
+
+## La serie Fast Track
+
+Este es el **#3** de una serie que desentraña secciones de *[Symfony: The Fast Track](https://symfony.com/doc/6.4/the-fast-track/en/index.html)* con casos de uso reales. Los tres componen sobre el mismo evento `entered.publicado` del Workflow:
+
+- **#1 Workflow** — estados, guards y eventos · [repo](https://github.com/walteru/symfony-workflow-flujo-editorial) · [post](https://sincrodev.com/blog/symfony-workflow-maquina-estados-flujo-editorial/)
+- **#2 Messenger** — trabajo lento fuera del request · [repo](https://github.com/walteru/symfony-messenger-tareas-async) · [post](https://sincrodev.com/blog/symfony-messenger-tareas-async-fuera-del-request/)
+- **#3 HttpCache + ESI** — páginas públicas rápidas · [repo](https://github.com/walteru/symfony-cache-paginas-publicas) · [post](https://sincrodev.com/blog/symfony-cache-paginas-publicas-rapidas-sin-servir-viejo/)
 
 ## Licencia
 
